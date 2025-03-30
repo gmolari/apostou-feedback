@@ -52,7 +52,7 @@ export const Answer = pgTable("Answer", {
     .notNull(),
 });
 
-// Relações
+
 // Relações
 export const usersRelations = relations(User, ({ many }) => ({
   answers: many(Answer),

@@ -11,3 +11,11 @@ export const questionMapper = z.object({
   title: z.string(),
   type: z.string(),
 });
+
+export const answerMapper = z.object({
+  id: z.number(),
+  answer: z.string(),
+  created_at: z.date(),
+  user: userMapper,
+  question: questionMapper,
+});
