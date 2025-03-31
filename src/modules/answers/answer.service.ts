@@ -106,7 +106,7 @@ export async function getAllAnswers(query: GetAllAnswersPayload) {
       user: {
         id: User.id,
         name: User.name,
-        cpf: User.cpf,
+        email: User.email,
         phone: User.phone,
       },
       question: {
