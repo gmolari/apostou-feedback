@@ -4,6 +4,7 @@ export const userMapper = z.object({
   id: z.number(),
   name: z.string(),
   phone: z.string(),
+  cpf: z.string(),
 });
 
 export const questionMapper = z.object({

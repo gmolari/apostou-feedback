@@ -7,3 +7,11 @@ export const createUserDto = z.object({
 });
 
 export type CreateUserInput = z.infer<typeof createUserDto>;
+
+export const getAllUsersDto = z.object({
+  name: z.array(z.string()),
+  cpf: z.array(z.string()),
+  phone: z.array(z.string()),
+});
+
+export type GetAllUsersPayload = z.infer<typeof getAllUsersDto>;
