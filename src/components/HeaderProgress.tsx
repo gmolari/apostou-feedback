@@ -33,15 +33,15 @@ const HeaderContainer = styled.div`
   padding: 1rem 0 0rem 0;
 
   @media (min-width: 340px) {
-    padding: 3rem 0 1rem 0;
+    padding: 2rem 0 1rem 0;
   }
 
-  @media (min-width: 390px) {
-    padding: 4rem 0 4rem 0;
+  @media (min-width: 391px) {
+    padding: 2rem 0 4rem 0;
   }
 
   @media (min-width: 760px) {
-    padding: 4rem 0 2rem 0;
+    padding: 2rem 0 2rem 0;
   }
 `;
 
