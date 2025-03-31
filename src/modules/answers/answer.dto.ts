@@ -10,6 +10,7 @@ export type CreateAnswerPayload = z.infer<typeof createAnswerDto>;
 
 export const getAllAnswersDto = z.object({
   answer: z.array(z.string()),
+  question_type: z.array(z.string()),
 });
 
 export type GetAllAnswersPayload = z.infer<typeof getAllAnswersDto>;

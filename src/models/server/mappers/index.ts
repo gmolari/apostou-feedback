@@ -19,3 +19,11 @@ export const answerMapper = z.object({
   user: userMapper,
   question: questionMapper,
 });
+
+export const simplifiedAnswerMapper = z.object({
+  id: z.number(),
+  answer: z.string(),
+  created_at: z.date(),
+  user_id: z.number(),
+  question_id: z.number(),
+});

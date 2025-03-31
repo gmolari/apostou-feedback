@@ -8,17 +8,25 @@ import { isPostgresError } from "@/lib/utils/is-postgres-error";
 
 // Modules
 import { createAnswer, getAllAnswers } from "@/modules/answers/answer.service";
-import { createAnswerDto } from "@/modules/answers/answer.dto";
-import { answerMapper } from "@/models/server/mappers";
+import {
+  createAnswerDto,
+  CreateAnswerPayload,
+} from "@/modules/answers/answer.dto";
+import { answerMapper, simplifiedAnswerMapper } from "@/models/server/mappers";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const parsed = createAnswerDto.parse(body);
+
+    if (!Array.isArray(body)) throw new Error("Payload must be an array");
+
+    let parsed: CreateAnswerPayload[];
+
+    parsed = createAnswerDto.array().parse(body);
 
     const answer = await createAnswer(parsed);
 
-    const answerMapped = answerMapper.parse(answer);
+    const answerMapped = simplifiedAnswerMapper.array().parse(answer);
 
     return NextResponse.json(answerMapped, { status: 200 });
   } catch (error: any) {
@@ -74,8 +82,9 @@ export async function GET(req: Request) {
     const queryParams = new URL(req.url).searchParams;
 
     const answer = queryParams.getAll("answer");
+    const question_type = queryParams.getAll("question_type");
 
-    const answers = await getAllAnswers({ answer });
+    const answers = await getAllAnswers({ answer, question_type });
 
     const answersMapped = answerMapper.array().parse(answers);
 

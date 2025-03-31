@@ -5,7 +5,7 @@ import { ZodError } from "zod";
 
 // Helpers
 import { isPostgresError } from "@/lib/utils/is-postgres-error";
-import { questionMapper, userMapper } from "@/models/server/mappers";
+import { questionMapper } from "@/models/server/mappers";
 
 // Modules
 import { createQuestionDto } from "@/modules/questions/question.dto";
@@ -13,7 +13,6 @@ import {
   createQuestion,
   getAllQuestions,
 } from "@/modules/questions/question.service";
-import { questionType } from "@/database/schema";
 
 export async function POST(req: Request) {
   try {
