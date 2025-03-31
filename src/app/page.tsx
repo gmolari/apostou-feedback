@@ -29,9 +29,19 @@ const StyledContainer = styled.div`
   border: 1px solid #ff562222;
   box-shadow: 0 0 6px #ff562226;
   z-index: 10;
+  min-height: calc(100dvh - 16rem); /* Subtraia a altura do Footer */
+
+  @media (min-width: 320px) {
+    min-height: calc(100dvh - 25rem); /* Subtraia a altura do Footer */
+  }
+
+  @media (min-width: 380px) {
+    min-height: calc(100dvh - 35rem); /* Subtraia a altura do Footer */
+  }
 
   @media (min-width: 760px) {
     width: 80%;
+    min-height: calc(100dvh - 20rem); /* Subtraia a altura do Footer */
   }
 `;
 

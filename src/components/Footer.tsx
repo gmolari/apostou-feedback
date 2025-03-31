@@ -13,23 +13,36 @@ const FooterContainer = styled.footer`
   color: #9ca3af;
   font-weight: 200;
   font-size: 12px;
-  border-top: 1px solid #ff562218; /* Linha superior para separar o footer */
-  position: fixed; /* Fixa o footer na parte inferior da tela */
-  bottom: 0; /* Alinha o footer na parte inferior */
-  left: 0; /* Garante que ele fique alinhado à esquerda */
-  z-index: 10; /* Garante que o footer fique acima de outros elementos */
+  border-top: 1px solid #ff562218;
+  position: fixed;
+  bottom: 0; 
+  left: 0; 
+  z-index: 10; 
+
+  @media (max-width: 320px) {
+    padding: 0.5rem 0.5rem;
+  }
 `;
 
 const FooterText = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Espaçamento entre o ícone e o texto */
+  gap: 0.5rem;
   font-size: 8px;
+
+  @media (max-width: 320px) {
+    font-size: 6.5px;
+    }
 `;
 
 const FooterIcon = styled.img`
   width: 16px;
   height: 16px;
+
+  @media (max-width: 320px) {
+    width: 12px;
+  height: 12px;
+    }
 `;
 
 const Footer: React.FC = () => {
