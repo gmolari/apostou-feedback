@@ -41,7 +41,7 @@ const HeaderContainer = styled.div`
   }
 
   @media (min-width: 760px) {
-    padding: 4rem 0 5rem 0;
+    padding: 4rem 0 2rem 0;
   }
 `;
 

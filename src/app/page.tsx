@@ -123,6 +123,10 @@ const StyledError = styled.p`
   @media (min-width: 760px) {
     font-size: 16px;
   }
+
+  @media (min-width: 1240px) {
+    font-size: 12px;
+  }
 `;
 
 const StyledButton = styled.button`
