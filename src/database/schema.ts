@@ -15,7 +15,7 @@ export const User = pgTable("User", {
     .primaryKey()
     .notNull(),
   name: text("name").notNull().unique(),
-  cpf: text("cpf").notNull().unique(),
+  email: text("email").notNull().unique(),
   phone: text("phone").notNull().unique(),
   createdAt: timestamp("created_at", {
     withTimezone: true,
@@ -51,7 +51,6 @@ export const Answer = pgTable("Answer", {
     .defaultNow()
     .notNull(),
 });
-
 
 // Relações
 export const usersRelations = relations(User, ({ many }) => ({

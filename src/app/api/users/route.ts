@@ -52,10 +52,10 @@ export async function GET(req: Request) {
     const queryParams = new URL(req.url).searchParams;
 
     const name = queryParams.getAll("name");
-    const cpf = queryParams.getAll("cpf");
+    const email = queryParams.getAll("email");
     const phone = queryParams.getAll("phone");
 
-    const users = await getAllUsers({ name, cpf, phone });
+    const users = await getAllUsers({ name, email, phone });
 
     const usersMapped = userMapper.array().parse(users);
 
