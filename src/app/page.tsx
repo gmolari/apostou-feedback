@@ -10,7 +10,7 @@ import "../styles/globals.css";
 import { useUser } from "@/contexts/UserContext";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
-import { useLoading } from "@/contexts/LoadingContext";
+import { useMutation } from "@tanstack/react-query";
 
 const registrationSchema = z.object({
   name: z.string().min(3, "O nome é obrigatório."),
@@ -23,6 +23,128 @@ const registrationSchema = z.object({
 });
 
 type RegistrationFormData = z.infer<typeof registrationSchema>;
+
+type User = {
+  id: string;
+  name: string;
+};
+
+const registerUser = async (data: RegistrationFormData): Promise<User> => {
+  const response = await fetch("/api/users", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(
+      errorData.errors?.[0]?.message || "Seus dados já foram registrados."
+    );
+  }
+
+  return response.json();
+};
+
+const Registration: React.FC = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegistrationFormData>({
+    resolver: zodResolver(registrationSchema),
+  });
+
+  const { setProgress } = useProgress();
+  const { setUser } = useUser();
+
+  const mutation = useMutation({
+    mutationFn: registerUser,
+    onSuccess: (user: User) => {
+      setUser({
+        id: Number(user.id),
+        name: user.name,
+      });
+      toast.success("Cadastro realizado com sucesso!");
+      setProgress(33);
+      window.location.href = "/questions";
+    },
+    onError: (error: Error) => {
+      toast.error(
+        error.message || "Ocorreu um erro ao enviar os dados. Tente novamente."
+      );
+    },
+  });
+
+  const onSubmit = (data: RegistrationFormData) => {
+    mutation.mutate(data);
+  };
+
+  return (
+    <div className="flex flex-col items-center min-h-screen bg-[#111111]">
+      <StyledContainer>
+        <h1 className="text-3xl font-regular text-center text-[#F06310]">
+          Bem vindo!
+        </h1>
+        <StyledParagraph>
+          Por favor, forneça suas informações para iniciar nossa pesquisa
+        </StyledParagraph>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div>
+            <StyledLabel htmlFor="name">Como devemos te chamar?</StyledLabel>
+            <StyledInputWrapper>
+              <img src="/icons/user.png" alt="Ícone de usuário" />
+              <input
+                id="name"
+                type="text"
+                {...register("name")}
+                placeholder="Digite seu nome e sobrenome"
+              />
+            </StyledInputWrapper>
+            {errors.name && <StyledError>{errors.name.message}</StyledError>}
+          </div>
+
+          <div>
+            <StyledLabel htmlFor="phone">Número</StyledLabel>
+            <StyledInputWrapper>
+              <img src="/icons/phone.png" alt="phone" />
+              <input
+                id="phone"
+                type="text"
+                {...register("phone")}
+                placeholder="Digite seu número"
+              />
+            </StyledInputWrapper>
+            {errors.phone && <StyledError>{errors.phone.message}</StyledError>}
+          </div>
+
+          <div>
+            <StyledLabel htmlFor="email">Email</StyledLabel>
+            <StyledInputWrapper>
+              <img src="/icons/mail.png" alt="mail" />
+              <input
+                id="email"
+                type="text"
+                {...register("email")}
+                placeholder="jhon@example.com"
+              />
+            </StyledInputWrapper>
+            {errors.email && <StyledError>{errors.email.message}</StyledError>}
+          </div>
+
+          <StyledButton type="submit" disabled={mutation.status === "pending"}>
+            {mutation.status === "pending" ? "Enviando..." : "Prosseguir"}
+          </StyledButton>
+        </form>
+      </StyledContainer>
+      <ToastContainer />
+    </div>
+  );
+};
+
+export default Registration;
 
 const StyledContainer = styled.div`
   width: 85%;
@@ -156,124 +278,3 @@ const StyledButton = styled.button`
     font-size: 18px;
   }
 `;
-
-const Registration: React.FC = () => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<RegistrationFormData>({
-    resolver: zodResolver(registrationSchema),
-  });
-
-  const { setProgress } = useProgress();
-  const { setUser } = useUser();
-  const { isLoading, setLoading } = useLoading();
-
-  const onSubmit = async (data: RegistrationFormData) => {
-    try {
-      setLoading(true);
-
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.errors?.[0]?.message || "Seus dados já foram registrados."
-        );
-      }
-
-      const user = await response.json();
-
-      setUser({
-        id: user.id,
-        name: user.name,
-      });
-
-      toast.success("Cadastro realizado com sucesso!");
-      setProgress(33);
-      window.location.href = "/questions";
-    } catch (error: any) {
-      toast.error(
-        error.message || "Ocorreu um erro ao enviar os dados. Tente novamente."
-      );
-    } finally { 
-      setLoading(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-[#111111]">
-        <div className="loading-spinner">Carregando...</div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center min-h-screen bg-[#111111]">
-      <StyledContainer>
-        <h1 className="text-3xl font-regular text-center text-[#F06310]">
-          Bem vindo!
-        </h1>
-        <StyledParagraph>
-          Por favor, forneça suas informações para iniciar nossa pesquisa
-        </StyledParagraph>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <StyledLabel htmlFor="name">Como devemos te chamar?</StyledLabel>
-            <StyledInputWrapper>
-              <img src="/icons/user.png" alt="Ícone de usuário" />
-              <input
-                id="name"
-                type="text"
-                {...register("name")}
-                placeholder="Digite seu nome e sobrenome"
-              />
-            </StyledInputWrapper>
-            {errors.name && <StyledError>{errors.name.message}</StyledError>}
-          </div>
-
-          <div>
-            <StyledLabel htmlFor="phone">Número</StyledLabel>
-            <StyledInputWrapper>
-              <img src="/icons/phone.png" alt="phone" />
-              <input
-                id="phone"
-                type="text"
-                {...register("phone")}
-                placeholder="Digite seu número"
-              />
-            </StyledInputWrapper>
-            {errors.phone && <StyledError>{errors.phone.message}</StyledError>}
-          </div>
-
-          <div>
-            <StyledLabel htmlFor="email">Email</StyledLabel>
-            <StyledInputWrapper>
-              <img src="/icons/mail.png" alt="mail" />
-              <input
-                id="email"
-                type="text"
-                {...register("email")}
-                placeholder="jhon@example.com"
-              />
-            </StyledInputWrapper>
-            {errors.email && <StyledError>{errors.email.message}</StyledError>}
-          </div>
-
-          <StyledButton type="submit">Prosseguir</StyledButton>
-        </form>
-      </StyledContainer>
-      <ToastContainer />
-    </div>
-  );
-};
-
-export default Registration;
