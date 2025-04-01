@@ -7,6 +7,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProgress } from "@/contexts/ProgressContext";
 import "../styles/globals.css";
+import { useUser } from "@/contexts/UserContext";
 
 const registrationSchema = z.object({
   name: z.string().min(3, "O nome é obrigatório."),
@@ -23,6 +24,7 @@ type RegistrationFormData = z.infer<typeof registrationSchema>;
 
 const StyledContainer = styled.div`
   width: 85%;
+  max-width: 500px;
   padding: 1.5rem;
   background-color: #1a1a1a;
   border-radius: 0.5rem;
@@ -165,6 +167,7 @@ const Registration: React.FC = () => {
   });
 
   const { setProgress } = useProgress();
+  const { setUser } = useUser(); // Acessa o método para salvar o usuário no contexto
 
   const onSubmit = async (data: RegistrationFormData) => {
     try {
@@ -185,8 +188,15 @@ const Registration: React.FC = () => {
         );
       }
 
-      const result = await response.json();
-      console.log("Usuário criado com sucesso:", result);
+      const user = await response.json(); // O backend retorna o objeto do usuário
+      console.log("Usuário criado com sucesso:", user);
+
+      setUser({
+        id: user.id,
+        name: user.name,
+      });
+
+      console.log("Usuário salvo no contexto:", { id: user.id, name: user.name });
 
       setProgress(33);
       window.location.href = "/questions";

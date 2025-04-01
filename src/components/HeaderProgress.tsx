@@ -52,6 +52,7 @@ const Logo = styled.img`
 
 const ProgressBarContainer = styled.div`
   width: 85%;
+  max-width: 500px;
   height: 8px;
   background-color: #1f2937;
   border-radius: 4px;
