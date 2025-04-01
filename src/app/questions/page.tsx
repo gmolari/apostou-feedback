@@ -7,6 +7,18 @@ import { useUser } from "@/contexts/UserContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLoading } from "@/contexts/LoadingContext";
+import { useQuery, useMutation } from "@tanstack/react-query";
+
+type YourPayloadType = {
+  answer: string;
+  user_id: number;
+  question_id: number;
+}[];
+
+type Question = {
+  id: number;
+  title: string;
+};
 
 const StyledContainer = styled.div`
   width: 85%;
@@ -188,31 +200,51 @@ const questionIcons: { [key: number]: string } = {
 };
 
 const Feedback: React.FC = () => {
-  const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
   const { user, loading } = useUser();
   const { setProgress } = useProgress();
   const { isLoading, setLoading } = useLoading();
 
-  useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        setLoading(true); 
-        const response = await fetch("/api/questions");
-        if (!response.ok) {
-          throw new Error("Erro ao buscar questões");
-        }
-        const data = await response.json();
-        setQuestions(data);
-      } catch (error) {
-        toast.error("Erro ao buscar questões.");
-      } finally {
-        setLoading(false);
+  // Corrigido: Passando um objeto com a função de busca
+  const {
+    data: questions = [],
+    isLoading: isQuestionsLoading,
+    error: questionsError,
+  } = useQuery({
+    queryKey: ["questions"], // Chave da consulta
+    queryFn: async () => {
+      const response = await fetch("/api/questions");
+      if (!response.ok) {
+        throw new Error("Erro ao buscar questões");
       }
-    };
+      return response.json();
+    },
+  });
 
-    fetchQuestions();
-  }, [setLoading]);
+  const mutation = useMutation({
+    mutationFn: async (payload: YourPayloadType) => {
+      // Lógica para a mutação, como uma chamada de API
+      const response = await fetch("/api/answers", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Erro ao realizar a mutação");
+      }
+      return response.json();
+    },
+    onSuccess: (data) => {
+      // Lógica a ser executada em caso de sucesso
+      console.log("Mutação bem-sucedida:", data);
+    },
+    onError: (error) => {
+      // Lógica a ser executada em caso de erro
+      console.error("Erro na mutação:", error);
+    },
+  });
 
   useEffect(() => {
     setProgress(66);
@@ -239,39 +271,21 @@ const Feedback: React.FC = () => {
       question_id: Number(question_id),
     }));
 
+    console.log("Payload enviado:", payload); // Adicione o console.log aqui
+
     try {
-      setLoading(true);
-      const response = await fetch("/api/answers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        if (
-          errorData.errors?.[0]?.includes("Respostas já existentes detectadas")
-        ) {
-          throw new Error("Você já enviou feedback para essas questões.");
-        }
-        throw new Error(errorData.errors?.[0] || "Erro ao enviar o feedback.");
-      }
-
+      await mutation.mutateAsync(payload);
       setProgress(100);
       toast.success(`Obrigado pelo feedback, ${user.name}!`);
-      window.location.href = "/completed";
+      // window.location.href = "/completed";
     } catch (error: any) {
       toast.error(
         error.message || "Erro ao enviar o feedback. Tente novamente."
       );
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (isLoading || loading) {
+  if (isLoading || loading || isQuestionsLoading) {
     return (
       <div className="flex flex-col items-center min-h-screen bg-[#111111]">
         <StyledContainer>
@@ -291,6 +305,11 @@ const Feedback: React.FC = () => {
     );
   }
 
+  if (questionsError) {
+    toast.error("Erro ao buscar questões.");
+    return null;
+  }
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-[#111111]">
       <StyledContainer>
@@ -303,7 +322,7 @@ const Feedback: React.FC = () => {
           <StyledTitle>Carregando questões...</StyledTitle>
         ) : (
           <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-            {questions.map((question) => (
+            {questions.map((question: Question) => (
               <QuestionWrapper key={question.id}>
                 <QuestionTitle>
                   <Icon
