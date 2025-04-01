@@ -271,13 +271,11 @@ const Feedback: React.FC = () => {
       question_id: Number(question_id),
     }));
 
-    console.log("Payload enviado:", payload); // Adicione o console.log aqui
-
     try {
       await mutation.mutateAsync(payload);
       setProgress(100);
       toast.success(`Obrigado pelo feedback, ${user.name}!`);
-      // window.location.href = "/completed";
+      window.location.href = "/completed";
     } catch (error: any) {
       toast.error(
         error.message || "Erro ao enviar o feedback. Tente novamente."
