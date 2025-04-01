@@ -8,6 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useProgress } from "@/contexts/ProgressContext";
 import "../styles/globals.css";
 import { useUser } from "@/contexts/UserContext";
+import "react-toastify/dist/ReactToastify.css";
+import { toast, ToastContainer } from "react-toastify";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const registrationSchema = z.object({
   name: z.string().min(3, "O nome é obrigatório."),
@@ -17,8 +20,7 @@ const registrationSchema = z.object({
     .min(10, "O número deve ter pelo menos 10 dígitos.")
     .max(15, "O número deve ter no máximo 15 dígitos.")
     .regex(/^\d{10,15}$/, "O número deve conter apenas dígitos."),
-    
-    });
+});
 
 type RegistrationFormData = z.infer<typeof registrationSchema>;
 
@@ -34,7 +36,6 @@ const StyledContainer = styled.div`
 
   @media (min-width: 760px) {
     width: 80%;
-  
   }
 `;
 
@@ -142,7 +143,6 @@ const StyledButton = styled.button`
   font-size: 10px;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  /* margin-top: 0; */
 
   &:hover {
     background-color: #e55a00;
@@ -167,11 +167,12 @@ const Registration: React.FC = () => {
   });
 
   const { setProgress } = useProgress();
-  const { setUser } = useUser(); // Acessa o método para salvar o usuário no contexto
+  const { setUser } = useUser();
+  const { isLoading, setLoading } = useLoading();
 
   const onSubmit = async (data: RegistrationFormData) => {
     try {
-      console.log("Dados enviados:", data);
+      setLoading(true);
 
       const response = await fetch("/api/users", {
         method: "POST",
@@ -184,29 +185,36 @@ const Registration: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.errors?.[0]?.message || "Erro ao enviar os dados."
+          errorData.errors?.[0]?.message || "Seus dados já foram registrados."
         );
       }
 
-      const user = await response.json(); // O backend retorna o objeto do usuário
-      console.log("Usuário criado com sucesso:", user);
+      const user = await response.json();
 
       setUser({
         id: user.id,
         name: user.name,
       });
 
-      console.log("Usuário salvo no contexto:", { id: user.id, name: user.name });
-
+      toast.success("Cadastro realizado com sucesso!");
       setProgress(33);
       window.location.href = "/questions";
     } catch (error: any) {
-      console.error("Erro ao enviar os dados:", error.message);
-      alert(
+      toast.error(
         error.message || "Ocorreu um erro ao enviar os dados. Tente novamente."
       );
+    } finally { 
+      setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#111111]">
+        <div className="loading-spinner">Carregando...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-[#111111]">
@@ -229,9 +237,7 @@ const Registration: React.FC = () => {
                 placeholder="Digite seu nome e sobrenome"
               />
             </StyledInputWrapper>
-            {errors.name && (
-              <StyledError>{errors.name.message}</StyledError>
-            )}
+            {errors.name && <StyledError>{errors.name.message}</StyledError>}
           </div>
 
           <div>
@@ -245,11 +251,7 @@ const Registration: React.FC = () => {
                 placeholder="Digite seu número"
               />
             </StyledInputWrapper>
-            {errors.phone && (
-              <StyledError>
-                {errors.phone.message}
-              </StyledError>
-            )}
+            {errors.phone && <StyledError>{errors.phone.message}</StyledError>}
           </div>
 
           <div>
@@ -263,17 +265,13 @@ const Registration: React.FC = () => {
                 placeholder="jhon@example.com"
               />
             </StyledInputWrapper>
-            {errors.email && (
-              <StyledError>
-                {errors.email.message}
-              </StyledError>
-            )}
+            {errors.email && <StyledError>{errors.email.message}</StyledError>}
           </div>
 
-          {/* Botão de Enviar */}
           <StyledButton type="submit">Prosseguir</StyledButton>
         </form>
       </StyledContainer>
+      <ToastContainer />
     </div>
   );
 };

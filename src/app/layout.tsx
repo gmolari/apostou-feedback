@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Background from "@/components/Background";
 import { ProgressProvider } from "@/contexts/ProgressContext";
 import { UserProvider } from "@/contexts/UserContext";
+import { LoadingProvider } from "@/contexts/LoadingContext"; // Importa o LoadingProvider
 
 const inter = Inter({
   weight: ["200", "400", "700", "900"],
@@ -25,14 +26,16 @@ export default function RootLayout({
     <html lang="pt-BR">
       <head></head>
       <body className={inter.className}>
-      <UserProvider>
-        <ProgressProvider>
-          <Background />
-          <HeaderProgress />
-          {children} {/* Conteúdo principal */}
-          <Footer />
-        </ProgressProvider>
-      </UserProvider>
+        <UserProvider>
+          <ProgressProvider>
+            <LoadingProvider>
+              <Background />
+              <HeaderProgress />
+              {children}
+              <Footer />
+            </LoadingProvider>
+          </ProgressProvider>
+        </UserProvider>
       </body>
     </html>
   );

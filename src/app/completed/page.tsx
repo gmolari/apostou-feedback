@@ -3,9 +3,11 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useProgress } from "@/contexts/ProgressContext";
+import { useUser } from "@/contexts/UserContext";
 
 const Confirmation: React.FC = () => {
   const { setProgress } = useProgress();
+  const { user } = useUser();
 
   useEffect(() => {
     setProgress(100);
@@ -15,12 +17,12 @@ const Confirmation: React.FC = () => {
     <div className="flex flex-col items-center min-h-screen bg-[#111111]">
       <StyledContainer>
         <Icon src="/check.png" alt="Ícone de confirmação" />
-        <StyledTitle>Obrigado, @Name!</StyledTitle>
+        <StyledTitle>Obrigado, {user?.name || "Usuário"}!</StyledTitle>
         <StyledParagraph>
           Seu feedback é muito valioso para nós. Agradecemos por dedicar seu
           tempo para nos ajudar a melhorar.
         </StyledParagraph>
-        <StyledButton onClick={() => window.location.href = "/"}>
+        <StyledButton onClick={() => (window.location.href = "/")}>
           Retomar
         </StyledButton>
       </StyledContainer>
@@ -32,12 +34,14 @@ export default Confirmation;
 
 const StyledContainer = styled.div`
   width: 85%;
+  max-width: 500px;
   padding: 1.5rem;
   background-color: #1a1a1a;
   border-radius: 0.5rem;
   border: 1px solid #ff562222;
   box-shadow: 0 0 6px #ff562226;
   text-align: center;
+  z-index: 5;
 
   @media (min-width: 760px) {
     width: 80%;
@@ -95,6 +99,7 @@ const StyledButton = styled.button`
   font-size: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  z-index: 10; /* Garante que o botão esteja acima de outros elementos */
 
   &:hover {
     background-color: #e55a00;

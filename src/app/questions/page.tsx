@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useProgress } from "@/contexts/ProgressContext";
 import { useUser } from "@/contexts/UserContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useLoading } from "@/contexts/LoadingContext";
 
 const StyledContainer = styled.div`
   width: 85%;
@@ -78,6 +81,10 @@ const QuestionTitle = styled.div`
   @media (min-width: 760px) {
     font-size: 18px;
   }
+
+  @media (min-width: 1000px) {
+    font-size: 12px;
+  }
 `;
 
 const Icon = styled.img`
@@ -92,6 +99,11 @@ const Icon = styled.img`
   @media (min-width: 760px) {
     width: 24px;
     height: 24px;
+  }
+
+  @media (min-width: 1000px) {
+    width: 18px;
+    height: 18px;
   }
 `;
 
@@ -138,6 +150,10 @@ const SliderValue = styled.span`
   @media (min-width: 760px) {
     font-size: 20px;
   }
+
+  @media (min-width: 1000px) {
+    font-size: 15px;
+  }
 `;
 
 const StyledButton = styled.button`
@@ -164,38 +180,45 @@ const StyledButton = styled.button`
   }
 `;
 
+const questionIcons: { [key: number]: string } = {
+  1: "/icons/star.png",
+  2: "/icons/health.png",
+  3: "/icons/like.png",
+  4: "/icons/desktop.png",
+};
+
 const Feedback: React.FC = () => {
-  const [questions, setQuestions] = useState<any[]>([]); // Estado para armazenar as questões
+  const [questions, setQuestions] = useState<any[]>([]);
   const [answers, setAnswers] = useState<{ [key: number]: number }>({});
   const { user, loading } = useUser();
   const { setProgress } = useProgress();
+  const { isLoading, setLoading } = useLoading();
 
   useEffect(() => {
-    // Busca as questões do backend
     const fetchQuestions = async () => {
       try {
-        const response = await fetch(
-          "https://apostou-feedback.vercel.app/api/questions"
-        );
+        setLoading(true); 
+        const response = await fetch("/api/questions");
         if (!response.ok) {
           throw new Error("Erro ao buscar questões");
         }
         const data = await response.json();
-        setQuestions(data); // Atualiza o estado com as questões
+        setQuestions(data);
       } catch (error) {
-        console.error("Erro ao buscar questões:", error);
+        toast.error("Erro ao buscar questões.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchQuestions();
-  }, []);
+  }, [setLoading]);
 
   useEffect(() => {
-    console.log("Usuário no localStorage:", localStorage.getItem("user"));
     setProgress(66);
 
     if (!loading && !user) {
-      alert("Erro: Usuário não autenticado.");
+      toast.error("Erro: Usuário não autenticado.");
       window.location.href = "/";
     }
   }, [setProgress, user, loading]);
@@ -206,7 +229,7 @@ const Feedback: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!user) {
-      alert("Erro: Usuário não autenticado.");
+      toast.error("Erro: Usuário não autenticado.");
       return;
     }
 
@@ -216,9 +239,8 @@ const Feedback: React.FC = () => {
       question_id: Number(question_id),
     }));
 
-    console.log("Payload enviado:", payload);
-
     try {
+      setLoading(true);
       const response = await fetch("/api/answers", {
         method: "POST",
         headers: {
@@ -229,24 +251,27 @@ const Feedback: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.errors?.[0]?.message || "Erro ao enviar o feedback."
-        );
+        if (
+          errorData.errors?.[0]?.includes("Respostas já existentes detectadas")
+        ) {
+          throw new Error("Você já enviou feedback para essas questões.");
+        }
+        throw new Error(errorData.errors?.[0] || "Erro ao enviar o feedback.");
       }
 
-      const result = await response.json();
-      console.log("Feedback enviado com sucesso:", result);
-
       setProgress(100);
-      alert(`Obrigado pelo feedback, ${user.name}!`);
+      toast.success(`Obrigado pelo feedback, ${user.name}!`);
       window.location.href = "/completed";
     } catch (error: any) {
-      console.error("Erro ao enviar o feedback:", error.message);
-      alert(error.message || "Erro ao enviar o feedback. Tente novamente.");
+      toast.error(
+        error.message || "Erro ao enviar o feedback. Tente novamente."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
+  if (isLoading || loading) {
     return (
       <div className="flex flex-col items-center min-h-screen bg-[#111111]">
         <StyledContainer>
@@ -282,7 +307,7 @@ const Feedback: React.FC = () => {
               <QuestionWrapper key={question.id}>
                 <QuestionTitle>
                   <Icon
-                    src={question.icon || "/icons/default.png"}
+                    src={questionIcons[question.id] || "/icons/default.png"}
                     alt={`Ícone da pergunta`}
                   />
                   {question.title}
@@ -306,6 +331,7 @@ const Feedback: React.FC = () => {
           </form>
         )}
       </StyledContainer>
+      <ToastContainer />
     </div>
   );
 };
