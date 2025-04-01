@@ -205,13 +205,12 @@ const Feedback: React.FC = () => {
   const { setProgress } = useProgress();
   const { isLoading, setLoading } = useLoading();
 
-  // Corrigido: Passando um objeto com a função de busca
   const {
     data: questions = [],
     isLoading: isQuestionsLoading,
     error: questionsError,
   } = useQuery({
-    queryKey: ["questions"], // Chave da consulta
+    queryKey: ["questions"],
     queryFn: async () => {
       const response = await fetch("/api/questions");
       if (!response.ok) {
@@ -223,7 +222,6 @@ const Feedback: React.FC = () => {
 
   const mutation = useMutation({
     mutationFn: async (payload: YourPayloadType) => {
-      // Lógica para a mutação, como uma chamada de API
       const response = await fetch("/api/answers", {
         method: "POST",
         body: JSON.stringify(payload),
@@ -237,11 +235,9 @@ const Feedback: React.FC = () => {
       return response.json();
     },
     onSuccess: (data) => {
-      // Lógica a ser executada em caso de sucesso
       console.log("Mutação bem-sucedida:", data);
     },
     onError: (error) => {
-      // Lógica a ser executada em caso de erro
       console.error("Erro na mutação:", error);
     },
   });
