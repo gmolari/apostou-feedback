@@ -13,10 +13,12 @@ const HeaderProgress: React.FC = () => {
   return (
     <HeaderContainer>
       <Logo src="/logo.png" alt="Logo Apostou" />
-      <ProgressBarContainer>
-        <ProgressBar progress={progress} />
-      </ProgressBarContainer>
-      <StepText>{`Passo ${currentStep} de 3`}</StepText>
+      <div className="flex flex-col w-[85%] max-w-[500px] items-center relative">
+        <ProgressBarContainer>
+          <ProgressBar progress={progress} />
+        </ProgressBarContainer>
+        <StepText className="self-end">{`Passo ${currentStep} de 3`}</StepText>
+      </div>
     </HeaderContainer>
   );
 };
@@ -51,17 +53,13 @@ const Logo = styled.img`
 `;
 
 const ProgressBarContainer = styled.div`
-  width: 85%;
+  width: 100%;
   max-width: 500px;
   height: 8px;
   background-color: #1f2937;
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 0.5rem;
-
-  @media (min-width: 760px) {
-    width: 80%;
-  }
 `;
 
 const ProgressBar = styled.div<{ progress: number }>`
@@ -75,6 +73,4 @@ const StepText = styled.p`
   color: #f06310;
   font-size: 10px;
   font-weight: 200;
-  align-self: flex-end;
-  margin-right: 10%;
 `;

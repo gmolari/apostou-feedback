@@ -8,6 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useLoading } from "@/contexts/LoadingContext";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 type YourPayloadType = {
   answer: string;
@@ -242,12 +243,14 @@ const Feedback: React.FC = () => {
     },
   });
 
+  const router = useRouter();
+
   useEffect(() => {
     setProgress(66);
 
     if (!loading && !user) {
       toast.error("Erro: Usuário não autenticado.");
-      window.location.href = "/";
+      router.push("/");
     }
   }, [setProgress, user, loading]);
 
@@ -271,7 +274,7 @@ const Feedback: React.FC = () => {
       await mutation.mutateAsync(payload);
       setProgress(100);
       toast.success(`Obrigado pelo feedback, ${user.name}!`);
-      window.location.href = "/completed";
+      router.push("/completed");
     } catch (error: any) {
       toast.error(
         error.message || "Erro ao enviar o feedback. Tente novamente."

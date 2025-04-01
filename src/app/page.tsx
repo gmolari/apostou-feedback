@@ -11,6 +11,7 @@ import { useUser } from "@/contexts/UserContext";
 import "react-toastify/dist/ReactToastify.css";
 import { toast, ToastContainer } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 const registrationSchema = z.object({
   name: z.string().min(3, "O nome é obrigatório."),
@@ -60,6 +61,8 @@ const Registration: React.FC = () => {
   const { setProgress } = useProgress();
   const { setUser } = useUser();
 
+  const router = useRouter();
+
   const mutation = useMutation({
     mutationFn: registerUser,
     onSuccess: (user: User) => {
@@ -69,7 +72,7 @@ const Registration: React.FC = () => {
       });
       toast.success("Cadastro realizado com sucesso!");
       setProgress(33);
-      window.location.href = "/questions";
+      router.push("/questions");
     },
     onError: (error: Error) => {
       toast.error(
