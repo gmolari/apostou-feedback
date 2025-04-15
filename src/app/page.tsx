@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 
 const registrationSchema = z.object({
   name: z.string().min(3, "O nome é obrigatório."),
-  email: z.string().email("Digite um email válido."),
+  email: z.string().email("Digite um email válido.").optional(),
   phone: z
     .string()
     .min(10, "O número deve ter pelo menos 10 dígitos.")
@@ -131,7 +131,7 @@ const Registration: React.FC = () => {
                 id="email"
                 type="text"
                 {...register("email")}
-                placeholder="jhon@example.com"
+                placeholder="jhon@example.com (opcional)"
               />
             </StyledInputWrapper>
             {errors.email && <StyledError>{errors.email.message}</StyledError>}
