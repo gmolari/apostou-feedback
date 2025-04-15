@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createUserDto = z.object({
   name: z.string().min(1),
-  email: z.string().min(11),
+  email: z.string().min(11).or(z.literal("")).optional(),
   phone: z.string().min(10).max(15),
 });
 

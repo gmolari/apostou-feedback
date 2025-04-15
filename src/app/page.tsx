@@ -15,7 +15,11 @@ import { useRouter } from "next/navigation";
 
 const registrationSchema = z.object({
   name: z.string().min(3, "O nome é obrigatório."),
-  email: z.string().email("Digite um email válido.").optional(),
+  email: z
+    .string()
+    .email("Digite um email válido.")
+    .or(z.literal(""))
+    .optional(),
   phone: z
     .string()
     .min(10, "O número deve ter pelo menos 10 dígitos.")
